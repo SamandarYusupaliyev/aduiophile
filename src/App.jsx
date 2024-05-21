@@ -1,51 +1,106 @@
-import "./App.css";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-  RouterProvider,
-} from "react-router-dom";
-// pages
-import Home from "./pages/home/Home";
-import Speakers from "./pages/Speakers";
-import HeadPhones from "./pages/HeadPhones";
-import EarPhones from "./pages/EarPhones";
-// product
-import ProductCart from "./product-detail/ProdutCart";
-// layout
-import RootsLayout from "./layout/RootsLayout";
-import Headphones_1 from "./product-detail/Headphones_1";
-import Headphones_2 from "./product-detail/Headphones_2";
-import Headphones_3 from "./product-detail/Headphones_3";
-import Speaker_4 from "./product-detail/Speaker_4";
-import Speaker_5 from "./product-detail/Speaker_5";
-import Airpods_6 from "./product-detail/Airpods_6";
-import NotFound from "./pages/NotFound";
-function App() {  
-  const router = createBrowserRouter(
-    createRoutesFromElements(
-      <Route element={<RootsLayout />}>
-        <Route index element={<Home />} />
-        <Route path="headphones" element={<HeadPhones />} />
-        <Route path="product" element={<ProductCart />}>
-          <Route index path="xx99" element={<Headphones_1 />} />
-          <Route path="xx991" element={<Headphones_2 />} />
-          <Route path="xx59" element={<Headphones_3 />} />
-          <Route path="zx9" element={<Speaker_4 />} />
-          <Route path="zx7" element={<Speaker_5 />} />
-          <Route path="yx1" element={<Airpods_6 />} />
-        </Route>
-        <Route path="speakers" element={<Speakers />} />
-        <Route path="earphones" element={<EarPhones />} />
-        <Route path="*" element={<NotFound/>}/>
-      </Route>
-    )
-  );
-  return (
-    <>
-      <RouterProvider router={router} />
-    </>
-  );
+  HomeLayout,
+  Landing,
+  Checkout,
+  Error,
+  Login,
+  Register,
+  SingleProduct,
+  Category,
+} from "./page";
+import { ErrorElement } from "./components";
+import { useState, useEffect } from "react";
+import data from "./data/db.json";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase/firebaseConfig";
+import { authReady, login } from "./features/user/userSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { action as RegisterAction } from "./page/Register";
+import { ProtectedRoutes } from './components'
+
+function App() {
+  const { user } = useSelector((state) => state.user)
+  const [categoryData, setCatagoryData] = useState({
+    headphones: [],
+    earphones: [],
+    speakers: [],
+  });
+
+  useEffect(() => {
+    const catagorizedData = {
+      headphones: data.filter((item) => item.category === "headphones"),
+      speakers: data.filter((item) => item.category === "speakers"),
+      earphones: data.filter((item) => item.category === "earphones"),
+    };
+    setCatagoryData(catagorizedData);
+  }, []);
+
+  const categories = {
+    headphones: {
+      title: "Headphones",
+      products: categoryData.headphones,
+    },
+    speakers: {
+      title: "Speakers",
+      products: categoryData.speakers,
+    },
+    earphones: {
+      title: "Earphones",
+      products: categoryData.earphones,
+    },
+  };
+
+  const routes = createBrowserRouter([
+    {
+      path: "/",
+      element: <ProtectedRoutes user={user}>
+        <HomeLayout/>
+      </ProtectedRoutes>,
+      errorElement: <Error />,
+      children: [
+        {
+          index: true,
+          element: <Landing />,
+          errorElement: <ErrorElement />,
+        },
+        {
+          path: ':category',
+          element: <Category categories={categories}/>
+        },
+        {
+          path: ':category/:slug',
+          element: <SingleProduct/>
+        },
+        {
+          path: "/checkout",
+          element: <Checkout />,
+        },
+      ],
+    },
+    {
+      path: "/login",
+      element: user ? <Navigate to="/" /> : <Login/>,
+      errorElement: <Error />,
+    },
+    {
+      path: "/register",
+      element: user ? <Navigate to="/" /> :  <Register/>,
+      errorElement: <Error />,
+      action: RegisterAction,
+    },
+  ]);
+
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      dispatch(login(user))
+      dispatch(authReady())
+    })
+  }, [])
+
+  return <>{ authReady && <RouterProvider router={routes}/> }</>;
 }
 
 export default App;
