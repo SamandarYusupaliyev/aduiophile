@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux'
 
 const themes ={
   winter:"winter",
-  dracula:"retro",
+  dracula:"dracula",
 }
 
 function darkModeFromLocalStoage(){
@@ -20,7 +20,7 @@ function darkModeFromLocalStoage(){
 function Navbar() {
   const [theme,setTheme] =useState(darkModeFromLocalStoage)
   const handleClick =() =>{
-    const newTheme =theme==themes.winter ? themes.retro:themes.winter
+    const newTheme =theme==themes.winter ? themes.dracula:themes.winter
     setTheme(newTheme)
     localStorage.setItem("mode",newTheme)
   }
