@@ -1,11 +1,30 @@
+import {BsMoonFill,BsSunFill} from "react-icons/bs"
 import { Link } from 'react-router-dom'
 import logo from '/assets/shared/desktop/logo.svg'
 import cartImg from '/assets/shared/desktop/icon-cart.svg' 
 import Cart from './Cart'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
+import { useEffect } from "react"
+
+
+function darkModeFromLocalStoage(){
+  return localStorage.getItem("mode") || themes.winter
+}
+
+
 
 function Navbar() {
+  const [theme,setTheme] =useState(darkModeFromLocalStoage)
+  const handleClick =() =>{
+    const newTheme =theme==themes.winter ? themes.dracula:themes.winter
+    setTheme(newTheme)
+    localStorage.setItem("mode",newTheme)
+  }
+  useEffect(()=>{
+    document.documentElement.setAttribute("data-theme",theme)
+  },[theme])
+
   const [showCart, setShowCart] = useState(false)
   const cart  = useSelector((state) => state.cart)
 
@@ -20,6 +39,15 @@ function Navbar() {
         <Link to='/'>
           <img src={logo} alt="" />
         </Link>
+        <label className="swap swap-rotate mt-1 items-center justify-center">
+            <input type="checkbox"
+            onClick={handleClick}
+            />
+            {/* sun icon */}
+             <BsSunFill className="swap-on fill-current w-4 h-4"/>
+             {/* moon icon */}
+             <BsMoonFill className="swap-off fill-current w-4 h-4" /> 
+            </label>
         <nav>
           <ul className='flex items-center gap-5'>
             <li>
