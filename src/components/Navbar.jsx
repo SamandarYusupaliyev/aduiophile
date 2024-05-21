@@ -3,10 +3,13 @@ import { Link } from 'react-router-dom'
 import logo from '/assets/shared/desktop/logo.svg'
 import cartImg from '/assets/shared/desktop/icon-cart.svg' 
 import Cart from './Cart'
-import { useState } from 'react'
+import {useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useEffect } from "react"
 
+const themes ={
+  winter:"winter",
+  dracula:"retro",
+}
 
 function darkModeFromLocalStoage(){
   return localStorage.getItem("mode") || themes.winter
@@ -17,7 +20,7 @@ function darkModeFromLocalStoage(){
 function Navbar() {
   const [theme,setTheme] =useState(darkModeFromLocalStoage)
   const handleClick =() =>{
-    const newTheme =theme==themes.winter ? themes.dracula:themes.winter
+    const newTheme =theme==themes.winter ? themes.retro:themes.winter
     setTheme(newTheme)
     localStorage.setItem("mode",newTheme)
   }
@@ -39,15 +42,6 @@ function Navbar() {
         <Link to='/'>
           <img src={logo} alt="" />
         </Link>
-        <label className="swap swap-rotate mt-1 items-center justify-center">
-            <input type="checkbox"
-            onClick={handleClick}
-            />
-            {/* sun icon */}
-             <BsSunFill className="swap-on fill-current w-4 h-4"/>
-             {/* moon icon */}
-             <BsMoonFill className="swap-off fill-current w-4 h-4" /> 
-            </label>
         <nav>
           <ul className='flex items-center gap-5'>
             <li>
@@ -72,6 +66,15 @@ function Navbar() {
             </li>
           </ul>
         </nav>
+        <label className="swap swap-rotate  items-center justify-center left-40">
+            <input type="checkbox"
+            onClick={handleClick}
+            />
+            {/* sun icon */}
+             <BsSunFill className="swap-on fill-current w-6 h-6"/>
+             {/* moon icon */}
+             <BsMoonFill className="swap-off fill-current w-6 h-6" /> 
+        </label>
         <div className={`relative cursor-pointer indicator ${cart === false && "hidden"}`} onClick={toogleCart}>
           <img src={cartImg} alt="" />
           <span className='indicator-item badge badge-primary'>{cart.totalQuantity}</span>
